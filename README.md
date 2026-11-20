@@ -1,3 +1,5 @@
+<img src="docs/plugvr-icon.svg" width="96" alt="The PlugVR icon: a lit plug">
+
 # PlugVR Stash plugins
 
 [Stash](https://stashapp.cc) plugins by PlugVR Studio.
