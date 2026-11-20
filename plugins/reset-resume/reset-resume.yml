@@ -1,0 +1,7 @@
+name: Reset resume time
+description: Set Resume Time to 0 for every scene. Play Count and Play Duration stay unchanged. Requires Stash v0.24.3 or later.
+version: 1.2.3
+url: https://github.com/plugvr-studio/stash-plugins/tree/main/plugins/reset-resume
+ui:
+  javascript:
+    - reset-resume.js

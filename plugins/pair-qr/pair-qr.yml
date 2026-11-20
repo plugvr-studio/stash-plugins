@@ -1,0 +1,10 @@
+name: Pair QR
+description: Show the current server API key as a QR code containing the Stash URL and key, for pairing an app such as PlugVR. The text in the code can be edited, with placeholders for the URL, key and server name, and it warns when Stash is open at localhost. Pair QR is in Settings -> Security. Requires Stash v0.27.0 or later.
+version: 1.3.0
+url: https://github.com/plugvr-studio/stash-plugins/tree/main/plugins/pair-qr
+ui:
+  css:
+    - pair-qr.css
+  javascript:
+    - qrcode.js
+    - pair-qr.js

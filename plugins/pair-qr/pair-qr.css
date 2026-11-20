@@ -1,0 +1,216 @@
+.pair-qr-panel {
+  --pair-qr-size: min(280px, 70vw);
+  --pair-qr-pad: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: calc(var(--pair-qr-size) + (var(--pair-qr-pad) * 2));
+}
+
+.pair-qr-frame {
+  display: inline-block;
+  box-sizing: border-box;
+  background: #ffffff;
+  padding: var(--pair-qr-pad);
+  border-radius: 8px;
+}
+
+.pair-qr-frame img {
+  display: block;
+  width: var(--pair-qr-size);
+  height: auto;
+  image-rendering: pixelated;
+}
+
+/* Same size as the code, so the dialog does not jump while the text is edited. */
+.pair-qr-frame-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--pair-qr-size) + (var(--pair-qr-pad) * 2));
+  padding: 1.5rem;
+  background: transparent;
+  border: 1px dashed var(--bs-border-color, #394b59);
+  color: var(--bs-secondary-color, #bfccd6);
+  text-align: center;
+}
+
+.pair-qr-frame-empty .alert,
+.pair-qr-message {
+  margin: 0;
+}
+
+.pair-qr-frame-empty .alert {
+  overflow-wrap: anywhere;
+}
+
+.pair-qr-warning {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.pair-qr-warning strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.pair-qr-warning code {
+  color: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pair-qr-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pair-qr-caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color, #bfccd6);
+}
+
+.pair-qr-caption-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pair-qr-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.pair-qr-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pair-qr-label {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--bs-secondary-color, #bfccd6);
+}
+
+.pair-qr-label:not(:first-child) {
+  margin-top: 0.4rem;
+}
+
+.pair-qr-name-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pair-qr-name-row .form-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pair-qr-dice {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding-right: 0.65rem;
+  padding-left: 0.65rem;
+}
+
+.pair-qr-dice-icon {
+  display: block;
+}
+
+.pair-qr-text.form-control {
+  min-height: 6rem;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.pair-qr-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+  color: var(--bs-secondary-color, #bfccd6);
+}
+
+.pair-qr-hint code {
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font-size: 0.8125rem;
+}
+
+.pair-qr-preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  align-self: flex-start;
+}
+
+.pair-qr-failure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pair-qr-failure p {
+  margin: 0;
+}
+
+.pair-qr-failure-detail {
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+}
+
+.pair-qr-failure a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.pair-qr-description {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--bs-secondary-color, #bfccd6);
+}
+
+.pair-qr-fallback {
+  margin-top: 0.75rem;
+}
+
+.pair-qr-fallback > .btn {
+  margin-top: 1rem;
+}
+
+.modal-dialog.pair-qr-modal {
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.modal-body.pair-qr-body {
+  padding: 1.15rem 1rem 1.25rem;
+}
+
+@media (max-width: 40rem) {
+  .modal-dialog.pair-qr-modal {
+    width: auto;
+  }
+}

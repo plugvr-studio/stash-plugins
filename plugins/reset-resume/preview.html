@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Reset resume time states</title>
+  <style>
+    body {
+      margin: 0;
+      background: #12181d;
+      color: #f5f8fa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+    h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.35rem; }
+    .lead { margin: 0 0 1.75rem; color: #bfccd6; }
+    section { margin: 0 0 2.25rem; }
+    h2 { font-size: 0.95rem; font-weight: 600; margin: 0 0 0.75rem; color: #bfccd6; }
+    .settings {
+      background: #202b33;
+      border-radius: 6px;
+      padding: 0.25rem 1.25rem;
+    }
+    .setting {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 1.05rem 0;
+      border-bottom: 1px solid #394b59;
+    }
+    .setting:last-child { border-bottom: 0; }
+    .setting h3 { margin: 0; font-size: 1.25rem; font-weight: 500; line-height: 1.3; }
+    .setting .sub-heading {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: #bfccd6;
+    }
+    .stage { display: flex; justify-content: flex-start; }
+    .modal-dialog { width: auto; max-width: 500px; margin: 0; }
+    .modal-content { background: transparent; }
+    .modal-header, .modal-body, .modal-footer { background: #30404d; color: #f5f8fa; }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+      border-top-left-radius: 0.3rem;
+      border-top-right-radius: 0.3rem;
+    }
+    .modal-title { margin: 0; font-size: 1.25rem; font-weight: 500; }
+    .modal-body { padding: 1rem; }
+    .modal-body p { margin: 0 0 0.75rem; }
+    .modal-body ul { margin: 0; padding-left: 1.25rem; }
+    .modal-body li + li { margin-top: 0.35rem; }
+    .modal-body li.text-danger { font-weight: 600; }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 1rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.2);
+      border-bottom-left-radius: 0.3rem;
+      border-bottom-right-radius: 0.3rem;
+    }
+    .close { background: transparent; border: 0; color: #f5f8fa; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+    .btn {
+      border-radius: 0.25rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .btn:disabled { opacity: 0.65; cursor: default; }
+    .btn-danger { background: #db3737; border-color: #db3737; color: #fff; }
+    .btn-secondary { background: #394b59; border-color: #394b59; color: #fff; }
+    .text-danger { color: #ff7373; }
+    .report-note {
+      margin-top: 0.65rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #394b59;
+      border-radius: 0.25rem;
+      background: rgba(255, 255, 255, 0.04);
+      color: #bfccd6;
+      font-size: 0.8rem;
+      font-weight: 400;
+      line-height: 1.4;
+    }
+    .report-note a { color: #48aff0; font-weight: 600; text-decoration: underline; }
+    .alert-danger p { margin: 0; }
+    .text-success { color: #3dcc91; }
+    .alert-danger {
+      background: rgba(219, 55, 55, 0.18);
+      border: 1px solid #db3737;
+      color: #f5f8fa;
+      border-radius: 0.25rem;
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Reset resume time</h1>
+    <p class="lead">The settings row keeps its description. Reset opens a separate confirmation dialog.</p>
+    <div id="states"></div>
+  </main>
+  <script>
+    var INCOMPATIBLE =
+      "This extension is not compatible with this Stash version, or the Stash instance or database is not responding as expected. Nothing was changed.";
+    var REPORT =
+      '<div class="report-note">If you think this is a problem with the plugin, please report it to the developer on <a href="https://github.com/plugvr-studio/stash-plugins/issues" target="_blank" rel="noopener noreferrer">GitHub</a>.</div>';
+
+    function button(className, label, disabled) {
+      return '<button type="button" class="btn ' + className + '"' + (disabled ? " disabled" : "") + ">" + label + "</button>";
+    }
+
+    function errorText(text) {
+      var body = /[.!?]$/.test(text) ? text : text + ".";
+      return '<span class="text-danger">' + body + "</span>" + REPORT;
+    }
+
+    function row(subHeading, actions) {
+      return (
+        '<div class="setting"><div><h3>Reset resume time</h3>' +
+        '<div class="sub-heading">' + subHeading + "</div></div>" +
+        "<div>" + actions + "</div></div>"
+      );
+    }
+
+    var reset = button("btn-danger", "Reset");
+    var description = "Set Resume Time to 0 for every scene.";
+    var dialog =
+      '<div class="stage"><div class="modal-dialog"><div class="modal-content">' +
+      '<div class="modal-header"><div class="modal-title">Reset Resume Time?</div>' +
+      '<button class="close" type="button" aria-label="Close">×</button></div>' +
+      '<div class="modal-body"><p>Confirming will reset resume time to 0 for every scene.</p><ul>' +
+      "<li>Play Count and Play Duration are kept.</li>" +
+      '<li class="text-danger">This cannot be undone.</li>' +
+      "</ul></div>" +
+      '<div class="modal-footer">' + button("btn-secondary", "Cancel") + reset + "</div>" +
+      "</div></div></div>";
+    var states = [
+      ["Checking compatibility on load", row(description, button("btn-danger", "Checking…", true))],
+      ["Ready", row(description, reset)],
+      ["Confirmation dialog", dialog, true],
+      ["Resetting", row(description, button("btn-danger", "Resetting…", true))],
+      ["Done", row('<span class="text-success">Resume Time reset on 248 scenes.</span>', reset)],
+      ["Done, one scene", row('<span class="text-success">Resume Time reset on 1 scene.</span>', reset)],
+      ["Done, nothing to reset", row('<span class="text-success">Resume Time reset on 0 scenes.</span>', reset)],
+      ["Incompatible, SQL mutations missing", row(
+        errorText(INCOMPATIBLE + " Stash no longer provides querySQL and execSQL"),
+        button("btn-danger", "Reset", true)
+      )],
+      ["Incompatible, scenes table missing", row(
+        errorText(INCOMPATIBLE + " The scenes table is missing"),
+        button("btn-danger", "Reset", true)
+      )],
+      ["Incompatible, resume_time column missing", row(
+        errorText(INCOMPATIBLE + " The scenes table has no resume_time column"),
+        button("btn-danger", "Reset", true)
+      )],
+      ["Incompatible, Stash not responding", row(
+        errorText(INCOMPATIBLE + " Failed to fetch"),
+        button("btn-danger", "Reset", true)
+      )],
+      ["Reset failed, no row count", row(
+        errorText("Reset failed. Stash did not report how many scenes changed"),
+        reset
+      )],
+      ["Reset failed, Stash error", row(
+        errorText("Reset failed. database is locked"),
+        reset
+      )],
+      ["Plugin crashed while rendering", '<div class="alert alert-danger" role="alert"><p>Reset resume time failed and was disabled so Stash can keep working.</p></div>' + REPORT]
+    ];
+
+    document.getElementById("states").innerHTML = states
+      .map(function (state) {
+        var body = state[2] ? state[1] : '<div class="settings">' + state[1] + "</div>";
+        return "<section><h2>" + state[0] + "</h2>" + body + "</section>";
+      })
+      .join("");
+  </script>
+</body>
+</html>
