@@ -99,6 +99,13 @@
       border-radius: 0.25rem;
       padding: 0.75rem 1rem;
     }
+    .alert-info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+      border-radius: 0.25rem;
+      padding: 0.75rem 1rem;
+    }
     .row-alert { margin: 0; }
   </style>
   <link rel="stylesheet" href="pair-qr.css">
@@ -123,16 +130,17 @@
     </section>
 
     <section>
-      <h2>Dialog, the editor open with custom text, and Stash opened at localhost</h2>
+      <h2>Dialog, the editor open with custom text, Stash opened at localhost, and Stash with no username and password</h2>
       <div class="stages">
         <div id="default-stage"></div>
         <div id="editing-stage"></div>
         <div id="loopback-stage"></div>
+        <div id="keyless-stage"></div>
       </div>
     </section>
 
     <section>
-      <h2>When the code cannot be drawn: no API key, loading, the key cannot be read, the text is too long</h2>
+      <h2>When the code cannot be drawn: a username but no API key yet, loading, the key cannot be read, the text is too long</h2>
       <div class="stages">
         <div id="no-key-stage"></div>
         <div id="loading-stage"></div>
@@ -157,6 +165,8 @@
     // Sample values only, not a real key.
     var SERVER = { url: "http://192.168.1.100:9999", apiKey: "example-key-value", name: "Forklift" };
     var PLUGVR_TEXT = '{"url":"{url}","apiKey":"{apiKey}","name":"{name}"}';
+    var PLUGVR_KEYLESS_TEXT = '{"url":"{url}","name":"{name}"}';
+    var FALLBACK_NAME = "Dock Leveler";
     var PLUGVR_ICON =
       "data:image/svg+xml," +
       encodeURIComponent(
@@ -202,7 +212,7 @@
         '<div class="pair-qr-editor">' +
         '<label class="pair-qr-label">Name</label>' +
         '<div class="pair-qr-name-row">' +
-        '<input type="text" class="form-control pair-qr-name" placeholder="Optional, e.g. Home" value="' + escapeHtml(name || "") + '">' +
+        '<input type="text" class="form-control pair-qr-name" placeholder="' + FALLBACK_NAME + '" value="' + escapeHtml(name || "") + '">' +
         '<button type="button" class="btn btn-secondary pair-qr-dice" title="Pick another name" aria-label="Pick another name">' +
         '<svg class="pair-qr-dice-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">' +
         '<rect x="1.75" y="1.75" width="12.5" height="12.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect>' +
@@ -210,7 +220,7 @@
         '<circle cx="8" cy="8" r="1.2" fill="currentColor"></circle>' +
         '<circle cx="5.5" cy="10.5" r="1.2" fill="currentColor"></circle><circle cx="10.5" cy="10.5" r="1.2" fill="currentColor"></circle>' +
         "</svg></button></div>" +
-        '<p class="pair-qr-hint">Fills <code>{name}</code>. It starts as a random warehouse word; the dice picks another. PlugVR lists the server under this name, or under its address when it is empty.</p>' +
+        '<p class="pair-qr-hint">Fills <code>{name}</code>, the name PlugVR lists the server under. It starts as a random warehouse word; the dice picks another. Left empty, the code uses the one shown in grey.</p>' +
         '<label class="pair-qr-label">Text in the QR code</label>' +
         '<textarea class="form-control pair-qr-text" rows="4" spellcheck="false">' + escapeHtml(text) + "</textarea>" +
         '<p class="pair-qr-hint"><code>{url}</code> and <code>{apiKey}</code> become this server\'s URL and API key.</p>' +
@@ -248,6 +258,12 @@
       "Open Stash at this computer's network address, such as <code>http://192.168.1.20:9999</code>, and show the code from there. " +
       "Or select Edit and type that address in place of <code>{url}</code>.</div>" +
       codeFrame(PLUGVR_TEXT.replace("{url}", "http://localhost:9999")) + bar(PLUGVR_TEXT, false)
+    ));
+    show("keyless-stage", dialog(
+      "<div class=\"alert alert-info pair-qr-notice\"><strong>Works only on the same network as Stash.</strong> " +
+      "Stash has no username and password, so this code has no API key. To pair from other networks too, " +
+      "set a username and password in Settings → Security, then generate an API key: the code will carry it.</div>" +
+      codeFrame(PLUGVR_KEYLESS_TEXT) + bar(PLUGVR_TEXT, false)
     ));
     show("no-key-stage", dialog(
       emptyFrame('<p class="pair-qr-message">Stash has no API key yet. Use the Generate button on the API key row to create one.</p>') +

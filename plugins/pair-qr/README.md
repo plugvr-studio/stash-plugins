@@ -27,13 +27,15 @@ something else. When the code is drawn, these placeholders are replaced:
 | Placeholder | Becomes |
 |-------------|---------|
 | `{url}` | The address Stash is open at, such as `http://192.168.1.100:9999` |
-| `{apiKey}` | The server's API key |
-| `{name}` | What the **Name** field holds. PlugVR lists the server under this name, or under its address when the field is empty |
+| `{apiKey}` | The server's API key, or nothing when Stash has no username and password (see below) |
+| `{name}` | What the **Name** field holds: the name PlugVR lists the server under |
 
 The name starts as a random warehouse word, such as `Forklift`, `Pallet Jack`
 or `Yard Dog`, one of 50 picked each time the page loads. It shows after
 **PlugVR pairing** under the code. The dice button beside the **Name** field
-picks another one, never the one already there; or type your own.
+picks another one, never the one already there; or type your own. The name is
+optional: while the field is empty, the code uses another random word, shown in
+grey in the field.
 
 Everything else is encoded as typed. For example, `{apiKey}` alone gives a code
 with only the key. When the text is JSON, the values are escaped as JSON
@@ -54,6 +56,24 @@ the code then. Open Stash at the computer's network address (such as
 `http://192.168.1.20:9999`) and show the code from there, or select **Edit** and
 type that address in place of `{url}`. Pair QR checks only the address itself;
 it cannot tell what a name such as `mypc` points to.
+
+## Stash without a username and password
+
+A Stash with no username and password answers devices on its own network
+without an API key, so Pair QR shows a code without one:
+
+```json
+{"url":"{url}","name":"{name}"}
+```
+
+A note above it says the code works only on the same network as Stash. To
+pair from other networks too, set a username and password under
+**Credentials** in **Settings → Security**, then select **Generate API key**:
+the code then carries the key. In your own text, `{apiKey}` becomes nothing.
+
+When credentials are removed, Stash keeps the old API key, and that key works
+again as soon as any credentials are set. Pair QR leaves it out of the code
+too. After setting credentials, generate a new key, which retires the old one.
 
 ## Requirements
 

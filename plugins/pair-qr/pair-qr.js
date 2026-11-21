@@ -27,11 +27,16 @@
     const React = PluginApi.React;
     const e = React.createElement;
 
+    // Without a username Stash has no login: it answers devices on its own
+    // network without a key, and can't make one. A key left over from removed
+    // credentials works again as soon as any are set, until a new key is
+    // generated. So without a username the code never carries a key.
     const CURRENT_KEY_QUERY = `
       query PairQrCurrentKey {
         configuration {
           general {
             apiKey
+            username
           }
         }
       }
@@ -66,18 +71,21 @@
 
     // Texts the editor can reset to. The first is the default. PlugVR's is what
     // its QrSetup.parse reads: url, and optionally apiKey and name (blank = none).
+    // keylessText is encoded instead when Stash has no login: PlugVR's setup
+    // schema wants apiKey left out then, not empty.
     const PRESETS = [
       {
         name: "PlugVR",
         caption: "PlugVR pairing",
         icon: PLUGVR_ICON,
         text: '{"url":"{url}","apiKey":"{apiKey}","name":"{name}"}',
+        keylessText: '{"url":"{url}","name":"{name}"}',
       },
     ];
 
     // Warehouse words and slang. The name starts as one of them, picked at random
     // each time the page loads, so each scan gives PlugVR a name to list the
-    // server under. Clearing the field leaves the naming to PlugVR (its address).
+    // server under. An empty field gets one too (fallbackName below).
     const NAMES = [
       "Forklift", "Pallet Jack", "Loading Dock", "Cross Dock", "Pick Face",
       "Golden Zone", "Mezzanine", "Shrink Wrap", "Conveyor", "Dock Leveler",
@@ -108,6 +116,13 @@
     // the dialog keeps them, a reload brings back the defaults. Nothing is saved.
     let editedText = PRESETS[0].text;
     let editedName = randomName();
+    // The name used while the field is empty, shown there in grey. Picked once
+    // per page load, so the code does not change while the field stays empty.
+    const fallbackName = randomName();
+
+    function codeName(name) {
+      return String(name || "").trim() ? name : fallbackName;
+    }
 
     function errorText(err, fallback) {
       try {
@@ -350,12 +365,16 @@
       return dataUrl;
     }
 
-    // What the frame shows for this text: { imageUrl }, { message } or { error }.
-    // key is { status: "loading" | "ready" | "error", value, error }.
+    // What the frame shows for this text: { imageUrl, keyless }, { message } or
+    // { error }. keyless means the text asks for the key but Stash has no login,
+    // so the code goes without it.
+    // key is { status: "loading" | "ready" | "error", value, hasUsername, error }.
     function qrFor(text, key, name) {
       if (!text) {
         return { message: "Type the text for the QR code." };
       }
+      let encoded = text;
+      let keyless = false;
       if (text.indexOf(API_KEY_PLACEHOLDER) !== -1) {
         if (key.status === "loading") {
           return { message: "Loading…" };
@@ -363,19 +382,30 @@
         if (key.status === "error") {
           return { error: key.error };
         }
-        if (!key.value) {
+        if (!key.hasUsername) {
+          keyless = true;
+          const preset = presetFor(text);
+          if (preset && preset.keylessText) {
+            encoded = preset.keylessText;
+          }
+        } else if (!key.value) {
           return { message: NO_KEY_MESSAGE };
         }
       }
       const url = serverUrl();
-      if (!url && text.indexOf(URL_PLACEHOLDER) !== -1) {
+      if (!url && encoded.indexOf(URL_PLACEHOLDER) !== -1) {
         return { error: "Could not read the server URL." };
       }
       try {
         return {
           imageUrl: qrDataUrl(
-            fillPlaceholders(text, { url: url, apiKey: key.value, name: name })
+            fillPlaceholders(encoded, {
+              url: url,
+              apiKey: keyless ? "" : key.value,
+              name: name,
+            })
           ),
+          keyless: keyless,
         };
       } catch (err) {
         if (isTooLong(err)) {
@@ -472,6 +502,15 @@
       );
     }
 
+    function keylessNotice() {
+      return e(
+        "div",
+        { className: "alert alert-info pair-qr-notice" },
+        e("strong", null, "Works only on the same network as Stash."),
+        " Stash has no username and password, so this code has no API key. To pair from other networks too, set a username and password in Settings → Security, then generate an API key: the code will carry it."
+      );
+    }
+
     const EDITOR_ID = "pair-qr-editor";
     const NAME_ID = "pair-qr-name";
     const NAME_HINT_ID = "pair-qr-name-hint";
@@ -482,6 +521,7 @@
       const [key, setKey] = React.useState({
         status: "loading",
         value: "",
+        hasUsername: false,
         error: "",
       });
       const [text, setText] = React.useState(editedText);
@@ -496,6 +536,7 @@
             setKey({
               status: "error",
               value: "",
+              hasUsername: false,
               error: errorText(err, "Could not read the current API key."),
             });
           }
@@ -506,14 +547,14 @@
               if (cancelled) {
                 return;
               }
-              const apiKey =
-                data &&
-                data.configuration &&
-                data.configuration.general &&
-                data.configuration.general.apiKey;
+              const general =
+                data && data.configuration && data.configuration.general;
+              const apiKey = general && general.apiKey;
+              const username = general && general.username;
               setKey({
                 status: "ready",
                 value: typeof apiKey === "string" ? apiKey : "",
+                hasUsername: typeof username === "string" && username !== "",
                 error: "",
               });
             })
@@ -546,7 +587,7 @@
 
       const qr = React.useMemo(
         function () {
-          return qrFor(text, key, name);
+          return qrFor(text, key, codeName(name));
         },
         [text, key, name]
       );
@@ -554,7 +595,9 @@
       // The name is in a preset's code but out of sight until Edit, so the
       // caption says it.
       const shownName =
-        preset && text.indexOf(NAME_PLACEHOLDER) !== -1 ? name.trim() : "";
+        preset && text.indexOf(NAME_PLACEHOLDER) !== -1
+          ? String(codeName(name)).trim()
+          : "";
       const captionText = preset
         ? preset.caption + (shownName ? " · " + shownName : "")
         : "Custom text";
@@ -586,7 +629,7 @@
                 type: "text",
                 className: "form-control pair-qr-name",
                 value: name,
-                placeholder: "Optional, e.g. Home",
+                placeholder: fallbackName,
                 autoComplete: "off",
                 spellCheck: false,
                 "aria-describedby": NAME_HINT_ID,
@@ -613,7 +656,7 @@
               { className: "pair-qr-hint", id: NAME_HINT_ID },
               "Fills ",
               e("code", null, NAME_PLACEHOLDER),
-              ". It starts as a random warehouse word; the dice picks another. PlugVR lists the server under this name, or under its address when it is empty."
+              ", the name PlugVR lists the server under. It starts as a random warehouse word; the dice picks another. Left empty, the code uses the one shown in grey."
             ),
             e(
               "label",
@@ -665,6 +708,7 @@
         "div",
         { className: "pair-qr-panel" },
         loopback ? loopbackWarning(loopback) : null,
+        qr.keyless ? keylessNotice() : null,
         qrFrame(qr, preset),
         e(
           "div",

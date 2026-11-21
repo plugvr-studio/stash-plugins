@@ -44,7 +44,8 @@
   overflow-wrap: anywhere;
 }
 
-.pair-qr-warning {
+.pair-qr-warning,
+.pair-qr-notice {
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.45;
@@ -52,7 +53,8 @@
   text-wrap: pretty;
 }
 
-.pair-qr-warning strong {
+.pair-qr-warning strong,
+.pair-qr-notice strong {
   display: block;
   margin-bottom: 0.2rem;
 }
