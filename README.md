@@ -2,7 +2,9 @@
 
 # PlugVR Stash plugins
 
-[Stash](https://stashapp.cc) plugins by PlugVR Studio.
+[Stash](https://stashapp.cc) plugins by PlugVR Studio. Pair QR shows the setup
+QR code for [PlugVR](https://plugvr.app), a VR player for Stash on Meta Quest 3
+and 3S.
 
 | Plugin | What it does | Requires |
 |--------|--------------|----------|
@@ -14,6 +16,7 @@
 ### Pair QR
 
 In **Settings → Security**, next to the API key. The QR code in the screenshot holds a sample URL and key.
+To scan it with PlugVR, follow the [setup guide](https://plugvr.app/setup#qr-plugin).
 
 <img src="docs/screenshots/pair-qr-setting.png" width="771" alt="The Pair QR row in Settings → Security, with a Show QR code button">
 

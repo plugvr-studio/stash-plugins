@@ -2,7 +2,9 @@
 
 A [Stash](https://stashapp.cc) UI plugin that shows the server API key as a QR
 code containing the Stash URL and key, so a mobile or VR app can pair with the
-server by scanning it.
+server by scanning it. It was made for [PlugVR](https://plugvr.app), a VR player
+for Stash on Meta Quest 3 and 3S; PlugVR's
+[setup guide](https://plugvr.app/setup#qr-plugin) shows how to scan the code.
 
 Pair QR appears in **Settings → Security**, next to the API key.
 
@@ -14,8 +16,8 @@ The QR code in the screenshot holds a sample URL and key.
 
 ## What the code holds
 
-By default the code holds the JSON that [PlugVR](https://www.meta.com/experiences/1473816599151470/)
-reads to pair:
+By default the code holds the JSON that PlugVR reads to pair, as described by
+its [JSON Schema](https://plugvr.app/setup-qr.schema.json):
 
 ```json
 {"url":"{url}","apiKey":"{apiKey}","name":"{name}"}
